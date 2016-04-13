@@ -82,7 +82,7 @@
 
 	    for (var scene in scenes) {
 	        game.registerScene(scene, scenes[scene]);
-	    }game.start("Game", _levels2.default.levels[0]);
+	    }game.start("Game", _levels2.default.levels[1]);
 
 	    window.game = game;
 	});
@@ -937,15 +937,15 @@
 
 	var _Util = __webpack_require__(5);
 
-	var _ui = __webpack_require__(49);
+	var _ui = __webpack_require__(50);
 
-	var _primitives = __webpack_require__(51);
+	var _primitives = __webpack_require__(52);
 
-	var _Player = __webpack_require__(56);
+	var _Player = __webpack_require__(57);
 
 	var _Player2 = _interopRequireDefault(_Player);
 
-	var _Config = __webpack_require__(57);
+	var _Config = __webpack_require__(47);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -982,7 +982,8 @@
 	    hingeHighlight: "red",
 	    tile: "#E9E9E9",
 	    coord: "#ffffff",
-	    player: "#3299BB"
+	    player: "#3299BB",
+	    finish: "#8BE76C"
 	};
 
 	var debug = (0, _debug2.default)("game:Game");
@@ -1004,12 +1005,13 @@
 	            var seed = _ref.seed;
 	            var initialPosition = _ref.initialPosition;
 	            var grid = _ref.grid;
+	            var difficulty = _ref.difficulty;
 
 	            var width = 400;
 	            this.game = new _primitives.Group({ x: this.renderer.width / 2 - width / 2, y: this.renderer.height / 2 - width / 2 });
 
 	            this.theme = ThemeGamebookers;
-	            this.seed = Math.floor(Math.random() * 10000);
+	            this.seed = seed || Math.floor(Math.random() * 10000);
 	            this.random = (0, _seedrandom2.default)(seed);
 	            this.gridSize = grid + 2; // Plus two for the extra bounding lanes
 	            this.grid = new _ui.Grid({
@@ -1055,12 +1057,33 @@
 	                color: this.theme.player
 	            });
 
-	            this.game.addChild(new _primitives.Rect({ width: this.grid.width, height: 5, fill: this.theme.player }));
+	            var lineSize = this.player.size / 2;
+
+	            // Start line
+	            this.game.addChild(this.startline = new _primitives.Rect({
+	                y: -lineSize, x: -1, // -1 To budge for border
+	                width: this.grid.width + 2,
+	                height: lineSize,
+	                fill: this.theme.player
+	            }));
+
+	            // Finish line
+	            this.game.addChild(new _primitives.Rect({
+	                y: this.grid.width, x: -1,
+	                width: this.grid.width + 2,
+	                height: lineSize,
+	                fill: this.theme.finish
+	            }));
+
 	            this.game.addChild(this.player);
 	            this.addChild(this.game);
 
 	            if (_Config.DEBUG) {
-	                this.seedText = new _primitives.Text({ x: 5, y: 5, text: "Seed: " + this.seed });
+	                this.seedText = new _primitives.Text({
+	                    x: 5, y: 5,
+	                    text: "Seed: " + this.seed + (difficulty ? "   Difficulty: " + difficulty + "/10" : "")
+	                });
+
 	                this.addChild(this.seedText);
 	            }
 	        }
@@ -1217,6 +1240,12 @@
 
 	            var gs = this.gridSize - 2; // Minux two to account for extra lanes
 
+	            // Check if the game is complete
+	            if (ny >= this.gridSize - 1) {
+	                // Reached the end!
+	                this.won();
+	            }
+
 	            // Not allow to move outside the posts
 	            if (nx < 0 || ny < 0 || nx > gs || ny > gs) {
 	                debug("Illegal move, ignoring.");
@@ -1301,6 +1330,13 @@
 	                    return nextHinges;
 	                }, []);
 	            });
+	        }
+	    }, {
+	        key: "won",
+	        value: function won() {
+	            this.player.won();
+	            this.player.color = this.theme.finish;
+	            this.startline.fill = this.theme.finish;
 	        }
 	    }, {
 	        key: "getGate",
@@ -6471,7 +6507,7 @@
 	        value: function render(ctx) {
 	            if (this.fill) {
 	                ctx.fillStyle = this.fill;
-	                ctx.fillRect(this.x, this.y, this.width, this.height);
+	                ctx.fillRect(0, 0, this.width, this.height);
 	            }
 
 	            _get(Object.getPrototypeOf(Rect.prototype), "render", this).call(this, ctx);
@@ -6497,7 +6533,9 @@
 
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-	var _Object2D2 = __webpack_require__(47);
+	var _Config = __webpack_require__(47);
+
+	var _Object2D2 = __webpack_require__(48);
 
 	var _Object2D3 = _interopRequireDefault(_Object2D2);
 
@@ -6525,7 +6563,7 @@
 	    _createClass(Box, [{
 	        key: "render",
 	        value: function render(ctx) {
-	            if (window.DEBUG) {
+	            if (_Config.DEBUG >= 5) {
 	                ctx.save();
 	                ctx.rect(0, 0, this.width, this.height);
 	                ctx.strokeStyle = "green";
@@ -6549,6 +6587,21 @@
 
 /***/ },
 /* 47 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Different levels of debug. Increase for more verbosity.
+	 * @type {Number}
+	 */
+	var DEBUG = exports.DEBUG = 1;
+
+/***/ },
+/* 48 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6559,7 +6612,7 @@
 
 	var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-	var _Node2 = __webpack_require__(48);
+	var _Node2 = __webpack_require__(49);
 
 	var _Node3 = _interopRequireDefault(_Node2);
 
@@ -6653,7 +6706,7 @@
 	exports.default = Object2D;
 
 /***/ },
-/* 48 */
+/* 49 */
 /***/ function(module, exports) {
 
 	"use strict";
@@ -6704,7 +6757,7 @@
 	exports.default = Node;
 
 /***/ },
-/* 49 */
+/* 50 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6714,11 +6767,11 @@
 	});
 	exports.Grid = exports.Button = undefined;
 
-	var _Button2 = __webpack_require__(50);
+	var _Button2 = __webpack_require__(51);
 
 	var _Button3 = _interopRequireDefault(_Button2);
 
-	var _Grid2 = __webpack_require__(55);
+	var _Grid2 = __webpack_require__(56);
 
 	var _Grid3 = _interopRequireDefault(_Grid2);
 
@@ -6728,7 +6781,7 @@
 	exports.Grid = _Grid3.default;
 
 /***/ },
-/* 50 */
+/* 51 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6739,7 +6792,7 @@
 
 	var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
-	var _primitives = __webpack_require__(51);
+	var _primitives = __webpack_require__(52);
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -6778,7 +6831,7 @@
 	exports.default = Button;
 
 /***/ },
-/* 51 */
+/* 52 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6792,11 +6845,11 @@
 
 	var _Rect3 = _interopRequireDefault(_Rect2);
 
-	var _Group2 = __webpack_require__(52);
+	var _Group2 = __webpack_require__(53);
 
 	var _Group3 = _interopRequireDefault(_Group2);
 
-	var _Text2 = __webpack_require__(53);
+	var _Text2 = __webpack_require__(54);
 
 	var _Text3 = _interopRequireDefault(_Text2);
 
@@ -6804,7 +6857,7 @@
 
 	var _Box3 = _interopRequireDefault(_Box2);
 
-	var _Circle2 = __webpack_require__(54);
+	var _Circle2 = __webpack_require__(55);
 
 	var _Circle3 = _interopRequireDefault(_Circle2);
 
@@ -6817,7 +6870,7 @@
 	exports.Circle = _Circle3.default;
 
 /***/ },
-/* 52 */
+/* 53 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6826,7 +6879,7 @@
 	  value: true
 	});
 
-	var _Object2D2 = __webpack_require__(47);
+	var _Object2D2 = __webpack_require__(48);
 
 	var _Object2D3 = _interopRequireDefault(_Object2D2);
 
@@ -6853,7 +6906,7 @@
 	exports.default = Group;
 
 /***/ },
-/* 53 */
+/* 54 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6913,7 +6966,7 @@
 	exports.default = Text;
 
 /***/ },
-/* 54 */
+/* 55 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6926,7 +6979,7 @@
 
 	var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-	var _Object2D2 = __webpack_require__(47);
+	var _Object2D2 = __webpack_require__(48);
 
 	var _Object2D3 = _interopRequireDefault(_Object2D2);
 
@@ -6975,7 +7028,7 @@
 	exports.default = Circle;
 
 /***/ },
-/* 55 */
+/* 56 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -6992,7 +7045,7 @@
 
 	var _debug2 = _interopRequireDefault(_debug);
 
-	var _primitives = __webpack_require__(51);
+	var _primitives = __webpack_require__(52);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7066,7 +7119,7 @@
 	exports.default = Button;
 
 /***/ },
-/* 56 */
+/* 57 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7083,13 +7136,13 @@
 
 	var _debug2 = _interopRequireDefault(_debug);
 
-	var _Object2D2 = __webpack_require__(47);
+	var _Object2D2 = __webpack_require__(48);
 
 	var _Object2D3 = _interopRequireDefault(_Object2D2);
 
 	var _Util = __webpack_require__(5);
 
-	var _Config = __webpack_require__(57);
+	var _Config = __webpack_require__(47);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7117,10 +7170,17 @@
 	        _this.currentPosition = options.initialPosition;
 	        _this.size = _this.spacing * 0.3;
 	        _this.color = options.color || "green";
+
+	        _this.hasWon = false;
 	        return _this;
 	    }
 
 	    _createClass(Player, [{
+	        key: "won",
+	        value: function won() {
+	            this.hasWon = true;
+	        }
+	    }, {
 	        key: "render",
 	        value: function render(ctx) {
 	            var _this2 = this;
@@ -7128,14 +7188,17 @@
 	            var s = this.size;
 	            var hs = this.size / 2;
 
-	            ctx.beginPath();
-
 	            var _positions$ = _slicedToArray(this.positions[0], 2);
 
 	            var ix = _positions$[0];
 	            var iy = _positions$[1];
 
-	            ctx.moveTo(this.toRealPosition(ix), this.toRealPosition(iy) - this.spacing / 2);
+
+	            ctx.beginPath();
+	            var irx = this.toRealPosition(ix);
+	            var iry = this.toRealPosition(iy);
+	            ctx.moveTo(irx, iry - this.spacing / 2);
+	            ctx.lineTo(irx, iry);
 
 	            // Render the tron stream
 	            if (this.positions.length > 2) this.positions.slice(1, -1).forEach(function (_ref, i) {
@@ -7158,17 +7221,22 @@
 	            ctx.lineTo(x, y);
 	            ctx.strokeStyle = this.color;
 	            ctx.lineWidth = hs;
-	            ctx.stroke();
 
-	            ctx.translate(x, y);
-	            ctx.fillStyle = this.color;
-	            ctx.fillRect(-hs, -hs, s, s);
+	            if (!this.hasWon) {
+	                ctx.stroke();
+	                ctx.translate(x, y);
+	                ctx.fillStyle = this.color;
+	                ctx.fillRect(-hs, -hs, s, s);
 
-	            if ((false) >= 3) {
-	                ctx.fillStyle = "purple";
-	                ctx.textAlign = "center";
-	                ctx.textBaseline = "middle";
-	                ctx.fillText(cx + "," + cy, 0, 0);
+	                if ((false) >= 3) {
+	                    ctx.fillStyle = "purple";
+	                    ctx.textAlign = "center";
+	                    ctx.textBaseline = "middle";
+	                    ctx.fillText(cx + "," + cy, 0, 0);
+	                }
+	            } else {
+	                ctx.lineTo(x, y + this.spacing / 2);
+	                ctx.stroke();
 	            }
 	        }
 	    }, {
@@ -7229,7 +7297,11 @@
 	                var py = _positions[1];
 
 
-	                if (x === px && y === py) this.positions.pop();
+	                if (x === px && y === py) {
+	                    this.positions.pop();
+	                    this.currentPosition = this.positions[this.positions.length - 1];
+	                    return;
+	                }
 	            }
 
 	            this.moveTo(x, y);
@@ -7267,21 +7339,6 @@
 	exports.default = Player;
 
 /***/ },
-/* 57 */
-/***/ function(module, exports) {
-
-	"use strict";
-
-	Object.defineProperty(exports, "__esModule", {
-	  value: true
-	});
-	/**
-	 * Different levels of debug. Increase for more verbosity.
-	 * @type {Number}
-	 */
-	var DEBUG = exports.DEBUG = 1;
-
-/***/ },
 /* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
@@ -7297,7 +7354,7 @@
 
 	var _Scene3 = _interopRequireDefault(_Scene2);
 
-	var _ui = __webpack_require__(49);
+	var _ui = __webpack_require__(50);
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -7350,6 +7407,15 @@
 					0
 				],
 				"grid": 10
+			},
+			{
+				"seed": 1000,
+				"initialPosition": [
+					2,
+					0
+				],
+				"grid": 5,
+				"difficulty": 2
 			}
 		]
 	};
