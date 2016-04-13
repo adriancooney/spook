@@ -1025,7 +1025,7 @@
 	            this.posts = (0, _Util.Array2d)(this.gridSize - 2, function (x, y) {
 	                // Create the gates for each grid dot. We can only have 1 gates
 	                // on corner dots and two on outer dots.
-	                var hingeCount = _this2.randInt(1, 4 - _this2.randInt(3));
+	                var hingeCount = _this2.randInt(1, 4 - _this2.randInt(2));
 
 	                var hinges = [];
 
@@ -1089,7 +1089,7 @@
 	        key: "randInt",
 	        value: function randInt(min, max) {
 	            if (typeof max === "undefined") max = min, min = 0;
-	            return Math.floor(min + this.random() * (max - min));
+	            return Math.max(0, Math.floor(min + this.random() * (max - min)));
 	        }
 	    }, {
 	        key: "renderGridDot",
@@ -7344,12 +7344,12 @@
 	module.exports = {
 		"levels": [
 			{
-				"seed": 41242134,
+				"seed": 8212,
 				"initialPosition": [
 					2,
 					0
 				],
-				"grid": 8212
+				"grid": 10
 			}
 		]
 	};
