@@ -1,10 +1,11 @@
 import seedrandom from "seedrandom";
 import Debug from "debug";
 import Scene from "../../library/Scene";
-import { Enum, Array2d, forEach2d } from "../../Util";
+import { Enum, Array2d, map2d } from "../../Util";
 import { Button, Grid } from "../../ui";
-import { Group } from "../../ui/primitives";
+import { Group, Text, Rect } from "../../ui/primitives";
 import Player from "./Player";
+import { DEBUG } from "../../Config";
 
 const Rotations = {
     "NORTH": 0,
@@ -38,14 +39,16 @@ const debug = Debug("game:Game");
 
 export default class Game extends Scene {
     create({ seed, initialPosition, grid }) {
-        this.game = new Group({ x: 80, y: 80 });
+        const width = 400;
+        this.game = new Group({ x: (this.renderer.width/2) - (width/2), y: (this.renderer.height/2) - (width/2) });
 
         this.theme = ThemeGamebookers;
-        this.seed = seedrandom(seed);
-        this.gridSize = grid + 2;
+        this.seed = Math.floor(Math.random() * 10000);
+        this.random = seedrandom(seed);
+        this.gridSize = grid + 2; // Plus two for the extra bounding lanes
         this.grid = new Grid({
             grid: this.gridSize,
-            width: 400,
+            width: width,
             renderDot: ::this.renderGridDot,
             renderTile: ::this.renderGridTile
         });
@@ -56,7 +59,7 @@ export default class Game extends Scene {
         this.posts = Array2d(this.gridSize - 2, (x, y) => {
             // Create the gates for each grid dot. We can only have 1 gates
             // on corner dots and two on outer dots.
-            let hingeCount = this.randInt(2, 4);
+            let hingeCount = this.randInt(1, 4 - this.randInt(3));
 
             const hinges = [];
 
@@ -79,8 +82,14 @@ export default class Game extends Scene {
             color: this.theme.player
         });
 
+        this.game.addChild(new Rect({ width: this.grid.width, height: 5, fill: this.theme.player }));
         this.game.addChild(this.player);
         this.addChild(this.game);
+
+        if(DEBUG) {
+            this.seedText = new Text({ x: 5, y: 5, text: "Seed: " + this.seed })
+            this.addChild(this.seedText);
+        }
     }
 
     /**
@@ -101,7 +110,7 @@ export default class Game extends Scene {
      */
     randInt(min, max) {
         if(typeof max === "undefined") max = min, min = 0;
-        return Math.floor(min + (this.seed() * (max - min)));
+        return Math.floor(min + (this.random() * (max - min)));
     }
 
     renderGridDot(ctx, x, y) {        
@@ -137,7 +146,7 @@ export default class Game extends Scene {
                 // Display any highlights
                 if(hinge.highlight) {
                     const now = Date.now();
-                    if((now - hinge.highlightTime) > 1000) {
+                    if((now - hinge.highlightTime) > 300) {
                         hinge.highlight = false;
                         delete hinge.highlightTime;
                     }
@@ -148,16 +157,23 @@ export default class Game extends Scene {
                 }
 
                 ctx.fillRect(-2, 0, 4, this.grid.spacing * 0.47);
-                ctx.fillStyle = "red";
-                ctx.fillText(`${hinge.direction}`, 0, 15);
+
+                if(DEBUG >= 5) {
+                    ctx.fillStyle = "red";
+                    ctx.fillText(`${hinge.direction}`, 0, 15);
+                }
+
                 ctx.restore();
             });
 
             // Render the post
             ctx.fillStyle = this.theme.post;
             ctx.fillRect(-4, -4, 8, 8);
-            ctx.fillStyle = "blue"
-            ctx.fillText(`${hx},${hy}`, 0, 0);
+
+            if(DEBUG >= 3) {
+                ctx.fillStyle = "blue"
+                ctx.fillText(`${hx},${hy}`, 0, 0);
+            }
         }
     }
 
@@ -179,11 +195,13 @@ export default class Game extends Scene {
         ctx.stroke();
         ctx.closePath();
 
-        // Render Coordinate
-        ctx.fillStyle = this.theme.coord;
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(`${x},${y}`, size/2, size/2);
+        if(DEBUG >= 3) {
+            // Render Coordinate
+            ctx.fillStyle = this.theme.coord;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            ctx.fillText(`${x},${y}`, size/2, size/2);
+        }
     }
 
     /**
@@ -194,6 +212,15 @@ export default class Game extends Scene {
         debug("Moving player %s.", move);
 
         const [ x, y ] = this.player.currentPosition;
+        const [nx, ny] = Player.movePoint(x, y, move);
+        const gs = this.gridSize - 2; // Minux two to account for extra lanes
+
+        // Not allow to move outside the posts
+        if(nx < 0 || ny < 0 || nx > gs || ny > gs) {
+            debug("Illegal move, ignoring.");
+            return;
+        }
+
         const direction = Game.moveToDirection(move);
         const gateState = this.getGateState(x, y, direction);
 
@@ -230,7 +257,8 @@ export default class Game extends Scene {
 
         const hp = Math.PI/2;
         const rotationTransform = rotation === "left" ? hp : -hp;
-        forEach2d(this.posts, (hinges, rx, ry) => {
+        map2d(this.posts, (hinges, rx, ry) => {
+            // Rotate the hinges
             hinges.forEach((hinge, i) => {
                 const directionPrevious = hinge.direction;
                 const direction = Game.rotateDirection(directionPrevious, rotation === "left");
@@ -252,6 +280,14 @@ export default class Game extends Scene {
                 // when determining strings. 
                 hinge.direction = direction;
             });
+
+            // Now remove any hinges facing the same direction
+            return hinges.reduce((nextHinges, hinge) => {
+                if(!nextHinges.find(h => hinge.direction === h.direction))
+                    nextHinges.push(hinge);
+
+                return nextHinges;
+            }, []);
         });
     }
 
