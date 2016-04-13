@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ccc;
+            overflow: hidden;
+        }
+
+        article {
+            display: block;
+        }
+
+        article p {
+            font-family: sans-serif;
+            font-size: 80%;
+            margin: 6px 0;
+            color: rgba(0,0,0,0.5);
+            flex: 1;
+            padding: 0 12px;
+        }
+
+        article p:last-child {
+            text-align: right;
+            width: 180px;
+            flex: none;
+        }
+
+        article p a {
+            color: inherit;
+        }
+
+        canvas {
+            display: block;
+            box-shadow: 0px 12px 40px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+<article>
+    <canvas id="game"></canvas>
+    <div style="display:flex;">
+        <p>Left &larr;, Down &darr; = Clockwise &#8635; <br>
+           Right &rarr;, Up &uarr; = Anti-Clockwise &#8634;</p>
+        <p><a href="http://adriancooney.ie">By Adrian Cooney</a></p>
+</article>
+</body>
+<script type="text/javascript" src="build/index.js"></script>
+</html>
