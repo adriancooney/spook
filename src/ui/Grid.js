@@ -6,7 +6,7 @@ const debug = Debug("game:Grid");
 export default class Button extends Box {
     constructor(options = {}) {
         const grid  = options.grid || 5;
-        const spacing = options.width ? options.width/grid - 1 : (options.spacing || 18);
+        const spacing = options.width ? options.width/(grid - 1) : (options.spacing || 18);
         const width = options.width || grid - 1 * spacing
         const height = options.height || 40;
 
@@ -14,6 +14,7 @@ export default class Button extends Box {
         this.leaf = true;
         this.grid = grid;
         this.spacing = spacing;
+        this.width = width;
 
         debug(`<Grid size=${grid} spacing=${spacing}>`);
 
@@ -37,7 +38,7 @@ export default class Button extends Box {
 
                 // We render one less tile than post
                 if(x < grid - 1 && y < grid - 1)
-                    this.renderTile(ctx, x, y, this.spacing);
+                    this.renderTile(ctx, x, y, spacing);
 
                 this.renderDot(ctx, x, y);
                 ctx.restore();
