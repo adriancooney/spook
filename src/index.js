@@ -17,7 +17,7 @@ window.addEventListener("DOMContentLoaded", function() {
     for(var scene in scenes)
         game.registerScene(scene, scenes[scene]);
 
-    game.start("Game", levels.levels[0]);
+    game.start("Game", levels.levels[1]);
 
     window.game = game;
 });

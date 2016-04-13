@@ -43,7 +43,7 @@ export default class Game extends Scene {
         this.game = new Group({ x: (this.renderer.width/2) - (width/2), y: (this.renderer.height/2) - (width/2) });
 
         this.theme = ThemeGamebookers;
-        this.seed = Math.floor(Math.random() * 10000);
+        this.seed = seed || Math.floor(Math.random() * 10000);
         this.random = seedrandom(seed);
         this.gridSize = grid + 2; // Plus two for the extra bounding lanes
         this.grid = new Grid({
@@ -83,6 +83,7 @@ export default class Game extends Scene {
         });
 
         this.game.addChild(new Rect({ width: this.grid.width, height: 5, fill: this.theme.player }));
+        this.game.addChild(new Rect({ y: this.grid.width + 30, width: this.grid.width, height: 5, fill: this.theme.player }));
         this.game.addChild(this.player);
         this.addChild(this.game);
 
