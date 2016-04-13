@@ -9,7 +9,7 @@ export default class Rect extends Box {
     render(ctx) {
         if(this.fill) {
             ctx.fillStyle = this.fill;
-            ctx.fillRect(this.x, this.y, this.width, this.height);
+            ctx.fillRect(0, 0, this.width, this.height);
         }
 
         super.render(ctx);

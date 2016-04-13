@@ -14,15 +14,24 @@ export default class Player extends Object2D {
         this.currentPosition = options.initialPosition;
         this.size = this.spacing * 0.3;
         this.color = options.color || "green";
+
+        this.hasWon = false;
+    }
+
+    won() {
+        this.hasWon = true;
     }
 
     render(ctx) {
         const s = this.size;
         const hs = this.size/2;
+        const [ix, iy] = this.positions[0];
 
         ctx.beginPath();
-        const [ix, iy] = this.positions[0];
-        ctx.moveTo(this.toRealPosition(ix), this.toRealPosition(iy) - this.spacing/2);
+        const irx = this.toRealPosition(ix);
+        const iry = this.toRealPosition(iy);
+        ctx.moveTo(irx, iry - this.spacing/2);
+        ctx.lineTo(irx, iry);
 
         // Render the tron stream
         if(this.positions.length > 2) this.positions.slice(1, -1).forEach(([x, y], i) => {
@@ -36,17 +45,22 @@ export default class Player extends Object2D {
         ctx.lineTo(x, y);
         ctx.strokeStyle = this.color;
         ctx.lineWidth = hs;
-        ctx.stroke();
 
-        ctx.translate(x, y);
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-hs, -hs, s, s);
-        
-        if(DEBUG >= 3) {
-            ctx.fillStyle = "purple";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(`${cx},${cy}`, 0, 0);
+        if(!this.hasWon) {
+            ctx.stroke();
+            ctx.translate(x, y);
+            ctx.fillStyle = this.color;
+            ctx.fillRect(-hs, -hs, s, s);
+            
+            if(DEBUG >= 3) {
+                ctx.fillStyle = "purple";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`${cx},${cy}`, 0, 0);
+            }
+        } else {
+            ctx.lineTo(x, y + this.spacing/2);
+            ctx.stroke();
         }
     }
 
@@ -84,10 +98,12 @@ export default class Player extends Object2D {
         if(this.positions.length > 1) {
             const [px, py] = this.positions[this.positions.length - 2]
 
-            if(x === px && y === py)
+            if(x === px && y === py) {
                 this.positions.pop();
+                this.currentPosition = this.positions[this.positions.length - 1];
+                return;
+            }
         }
-
 
         this.moveTo(x, y);
     }
