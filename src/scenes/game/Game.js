@@ -5,7 +5,8 @@ import { Enum, Array2d, map2d } from "../../Util";
 import { Button, Grid } from "../../ui";
 import { Group, Text, Rect } from "../../ui/primitives";
 import Player from "./Player";
-import { DEBUG } from "../../Config";
+import { DEBUG, Theme } from "../../Config";
+import { levels } from "../../levels.json";
 
 const Rotations = {
     "NORTH": 0,
@@ -16,35 +17,22 @@ const Rotations = {
 
 const Directions = Enum(...Object.keys(Rotations));
 
-const ThemeBlue = {
-    border: "#E0E4CC",
-    post: "#F38630",
-    hinge: "#000000",
-    tile: "#A7DBD8",
-    coord: "#ffffff" 
-};
-
-// http://www.colourlovers.com/palette/148712/Gamebookers
-const ThemeGamebookers = {
-    border: "#BCBCBC",
-    post: "#FF9900",
-    hinge: "#424242",
-    hingeHighlight: "red",
-    tile: "#E9E9E9",
-    coord: "#ffffff",
-    player: "#3299BB",
-    finish: "#8BE76C"
-};
-
 const debug = Debug("game:Game");
 
 export default class Game extends Scene {
-    create({ seed, initialPosition, grid, difficulty }) {
+    create(level) {
+        if(typeof level === "number") {
+            this.level = level;
+            level = levels[level];
+        }
+
+        let { seed, initialPosition, grid, difficulty } = level;
+
         const width = 400;
         this.game = new Group({ x: (this.renderer.width/2) - (width/2), y: (this.renderer.height/2) - (width/2) });
 
-        this.theme = ThemeGamebookers;
-        this.seed = seed || Math.floor(Math.random() * 10000);
+        this.theme = Theme;
+        this.seed = seed;
         this.random = seedrandom(seed);
         this.gridSize = grid + 2; // Plus two for the extra bounding lanes
         this.grid = new Grid({
@@ -78,7 +66,7 @@ export default class Game extends Scene {
 
         // Create the player
         this.player = new Player({
-            initialPosition,
+            initialPosition: [initialPosition, 0],
             spacing: this.grid.spacing,
             color: this.theme.player
         });
@@ -100,6 +88,30 @@ export default class Game extends Scene {
             height: lineSize, 
             fill: this.theme.finish 
         }));
+
+        // Level indicator
+        if(typeof this.level !== "undefined") {
+            this.addChild(new Text({
+                text: `LEVEL ${this.level}`,
+                x: this.renderer.width/2,
+                y: 5,
+                align: "center",
+                font: "bold 1.5em Arial",
+                color: "#aaa"
+            }));
+
+            // Restart button
+            this.addChild(new Button({
+                text: "RESTART",
+                x: (this.renderer.width/2) + (this.grid.width/2) - 60,
+                y: (this.renderer.height/2) + (this.grid.width/2) + 16,
+                font: "14px Arial",
+                fillText: "#777",
+                width: 60,
+                height: 24,
+                onClick: this.transition.bind(this, "Game", this.level)
+            }));
+        }
 
         this.game.addChild(this.player);
         this.addChild(this.game);
@@ -190,7 +202,10 @@ export default class Game extends Scene {
 
             // Render the post
             ctx.fillStyle = this.theme.post;
-            ctx.fillRect(-4, -4, 8, 8);
+            ctx.beginPath();
+            ctx.arc(0, 0, 6, 0, Math.PI*2);
+            ctx.closePath();
+            ctx.fill();
 
             if(DEBUG >= 3) {
                 ctx.fillStyle = "blue"
@@ -231,6 +246,8 @@ export default class Game extends Scene {
      * @param  {String} move Direction.
      */
     move(move) {
+        if(this.hasWon) return;
+
         debug("Moving player %s.", move);
 
         const [ x, y ] = this.player.currentPosition;
@@ -263,7 +280,7 @@ export default class Game extends Scene {
         this.player.move(move);
 
         // Normalize move to left and right.
-        const rotation = move === "up" ? "left" : move === "down" ? "right" : move;
+        const rotation = move === "up" ? "right" : move === "down" ? "left" : move;
 
         // Rotate the gates
         this.rotateGates(rotation);
@@ -320,9 +337,14 @@ export default class Game extends Scene {
     }
 
     won() {
+        this.hasWon = true;
         this.player.won();
         this.player.color = this.theme.finish;
         this.startline.fill = this.theme.finish;
+
+        setTimeout(() => {
+            this.transition("Game", ++this.level);
+        }, 1500);
     }
 
     static gateStates = Enum("CLOSED", "HALF_OPEN", "OPEN");
