@@ -18,11 +18,22 @@
         }
 
         article p {
-            text-align: right;
             font-family: sans-serif;
             font-size: 80%;
             margin: 6px 0;
             color: rgba(0,0,0,0.5);
+            flex: 1;
+            padding: 0 12px;
+        }
+
+        article p:last-child {
+            text-align: right;
+            width: 180px;
+            flex: none;
+        }
+
+        article p a {
+            color: inherit;
         }
 
         canvas {
@@ -34,7 +45,10 @@
 <body>
 <article>
     <canvas id="game"></canvas>
-    <p>By Adrian Cooney</p>
+    <div style="display:flex;">
+        <p>Left &larr;, Down &darr; = Clockwise &#8635; <br>
+           Right &rarr;, Up &uarr; = Anti-Clockwise &#8634;</p>
+        <p><a href="http://adriancooney.ie">By Adrian Cooney</a></p>
 </article>
 </body>
 <script type="text/javascript" src="build/index.js"></script>

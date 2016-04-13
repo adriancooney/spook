@@ -4,7 +4,7 @@ export default class Text extends Box {
     constructor(options) {
         super(options);
         this.text = options.text;
-        this.fill = options.fill || "#000000";
+        this.fill = options.fill || options.color || "#000000";
         this.font = options.font || "16px Arial";
         this.baseline = options.baseline || "top";
         this.align = options.align || "left";

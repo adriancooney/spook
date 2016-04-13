@@ -10,8 +10,9 @@ export default class Button extends Box {
         this.fill = new Rect({ width, height, fill: options.fillBackground });
         this.text = new Text({ 
             text: options.text,
-            align: "center",
-            baseline: "middle",
+            align: options.align || "center",
+            baseline: options.baseline || "middle",
+            font: options.font,
             x: width/2, 
             y: height/2,
             color: options.fillText

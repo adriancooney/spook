@@ -1,4 +1,5 @@
 import Node from "./Node";
+import { DEBUG } from "../Config";
 
 export default class Object2D extends Node {
     constructor(options) {
@@ -27,7 +28,7 @@ export default class Object2D extends Node {
     update() {}
 
     render(ctx) {
-        if(window.DEBUG) {
+        if(DEBUG >= 5) {
             ctx.save();
             ctx.fillStyle = "#000000";
             ctx.textBaseline = "top";

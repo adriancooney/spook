@@ -1,12 +1,22 @@
 {
     "levels": [{
-        "seed": 8212,
-        "initialPosition": [2, 0],
-        "grid": 10
-    },{
+        "seed": 224,
+        "initialPosition": 0,
+        "grid": 3,
+        "difficulty": 1    
+    }, {
+        "seed": 2,
+        "initialPosition": 4,
+        "grid": 5,
+        "difficulty": 5
+    }, {
         "seed": 1000,
-        "initialPosition": [2, 0],
+        "initialPosition": 2,
         "grid": 5,
         "difficulty": 2
+    }, {
+        "seed": 8212,
+        "initialPosition": 2,
+        "grid": 10
     }]
 }
