@@ -1,7 +1,7 @@
 {
     "levels": [{
-        "seed": 41242134,
+        "seed": 8212,
         "initialPosition": [2, 0],
-        "grid": 8212
+        "grid": 10
     }]
 }

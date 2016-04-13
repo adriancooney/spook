@@ -59,7 +59,7 @@ export default class Game extends Scene {
         this.posts = Array2d(this.gridSize - 2, (x, y) => {
             // Create the gates for each grid dot. We can only have 1 gates
             // on corner dots and two on outer dots.
-            let hingeCount = this.randInt(1, 4 - this.randInt(3));
+            const hingeCount = this.randInt(1, 4 - this.randInt(2));
 
             const hinges = [];
 
@@ -110,7 +110,7 @@ export default class Game extends Scene {
      */
     randInt(min, max) {
         if(typeof max === "undefined") max = min, min = 0;
-        return Math.floor(min + (this.random() * (max - min)));
+        return Math.max(0, Math.floor(min + (this.random() * (max - min))));
     }
 
     renderGridDot(ctx, x, y) {        
