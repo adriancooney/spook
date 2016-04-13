@@ -32,13 +32,14 @@ const ThemeGamebookers = {
     hingeHighlight: "red",
     tile: "#E9E9E9",
     coord: "#ffffff",
-    player: "#3299BB"
+    player: "#3299BB",
+    finish: "#8BE76C"
 };
 
 const debug = Debug("game:Game");
 
 export default class Game extends Scene {
-    create({ seed, initialPosition, grid }) {
+    create({ seed, initialPosition, grid, difficulty }) {
         const width = 400;
         this.game = new Group({ x: (this.renderer.width/2) - (width/2), y: (this.renderer.height/2) - (width/2) });
 
@@ -82,13 +83,33 @@ export default class Game extends Scene {
             color: this.theme.player
         });
 
-        this.game.addChild(new Rect({ width: this.grid.width, height: 5, fill: this.theme.player }));
-        this.game.addChild(new Rect({ y: this.grid.width + 30, width: this.grid.width, height: 5, fill: this.theme.player }));
+        const lineSize = this.player.size/2;
+
+        // Start line
+        this.game.addChild(this.startline = new Rect({ 
+            y: -lineSize, x: -1, // -1 To budge for border
+            width: this.grid.width + 2, 
+            height: lineSize, 
+            fill: this.theme.player 
+        }));
+
+        // Finish line
+        this.game.addChild(new Rect({ 
+            y: this.grid.width, x: -1, 
+            width: this.grid.width + 2, 
+            height: lineSize, 
+            fill: this.theme.finish 
+        }));
+
         this.game.addChild(this.player);
         this.addChild(this.game);
 
         if(DEBUG) {
-            this.seedText = new Text({ x: 5, y: 5, text: "Seed: " + this.seed })
+            this.seedText = new Text({ 
+                x: 5, y: 5, 
+                text: `Seed: ${this.seed}${difficulty ? "   Difficulty: " + difficulty + "/10" : ""}` 
+            });
+
             this.addChild(this.seedText);
         }
     }
@@ -216,6 +237,12 @@ export default class Game extends Scene {
         const [nx, ny] = Player.movePoint(x, y, move);
         const gs = this.gridSize - 2; // Minux two to account for extra lanes
 
+        // Check if the game is complete
+        if(ny >= this.gridSize - 1) {
+            // Reached the end!
+            this.won();
+        }
+
         // Not allow to move outside the posts
         if(nx < 0 || ny < 0 || nx > gs || ny > gs) {
             debug("Illegal move, ignoring.");
@@ -290,6 +317,12 @@ export default class Game extends Scene {
                 return nextHinges;
             }, []);
         });
+    }
+
+    won() {
+        this.player.won();
+        this.player.color = this.theme.finish;
+        this.startline.fill = this.theme.finish;
     }
 
     static gateStates = Enum("CLOSED", "HALF_OPEN", "OPEN");

@@ -6,6 +6,7 @@
     },{
         "seed": 1000,
         "initialPosition": [2, 0],
-        "grid": 5
+        "grid": 5,
+        "difficulty": 2
     }]
 }

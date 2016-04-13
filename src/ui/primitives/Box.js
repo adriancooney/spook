@@ -1,3 +1,4 @@
+import { DEBUG } from "../../Config";
 import Object2D from "../../library/Object2D";
 
 export default class Box extends Object2D {
@@ -8,7 +9,7 @@ export default class Box extends Object2D {
     }
 
     render(ctx) {
-        if(window.DEBUG) {
+        if(DEBUG >= 5) {
             ctx.save();
             ctx.rect(0, 0, this.width, this.height);
             ctx.strokeStyle = "green";

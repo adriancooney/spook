@@ -14,6 +14,12 @@ export default class Player extends Object2D {
         this.currentPosition = options.initialPosition;
         this.size = this.spacing * 0.3;
         this.color = options.color || "green";
+
+        this.hasWon = false;
+    }
+
+    won() {
+        this.hasWon = true;
     }
 
     render(ctx) {
@@ -39,17 +45,22 @@ export default class Player extends Object2D {
         ctx.lineTo(x, y);
         ctx.strokeStyle = this.color;
         ctx.lineWidth = hs;
-        ctx.stroke();
 
-        ctx.translate(x, y);
-        ctx.fillStyle = this.color;
-        ctx.fillRect(-hs, -hs, s, s);
-        
-        if(DEBUG >= 3) {
-            ctx.fillStyle = "purple";
-            ctx.textAlign = "center";
-            ctx.textBaseline = "middle";
-            ctx.fillText(`${cx},${cy}`, 0, 0);
+        if(!this.hasWon) {
+            ctx.stroke();
+            ctx.translate(x, y);
+            ctx.fillStyle = this.color;
+            ctx.fillRect(-hs, -hs, s, s);
+            
+            if(DEBUG >= 3) {
+                ctx.fillStyle = "purple";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(`${cx},${cy}`, 0, 0);
+            }
+        } else {
+            ctx.lineTo(x, y + this.spacing/2);
+            ctx.stroke();
         }
     }
 
