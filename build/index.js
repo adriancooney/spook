@@ -62,7 +62,7 @@
 
 	var scenes = _interopRequireWildcard(_scenes);
 
-	var _levels = __webpack_require__(58);
+	var _levels = __webpack_require__(59);
 
 	var _levels2 = _interopRequireDefault(_levels);
 
@@ -882,7 +882,7 @@
 	  }
 	});
 
-	var _Menu2 = __webpack_require__(57);
+	var _Menu2 = __webpack_require__(58);
 
 	var _Menu3 = _interopRequireDefault(_Menu2);
 
@@ -945,6 +945,8 @@
 
 	var _Player2 = _interopRequireDefault(_Player);
 
+	var _Config = __webpack_require__(57);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -1003,14 +1005,16 @@
 	            var initialPosition = _ref.initialPosition;
 	            var grid = _ref.grid;
 
-	            this.game = new _primitives.Group({ x: 80, y: 80 });
+	            var width = 400;
+	            this.game = new _primitives.Group({ x: this.renderer.width / 2 - width / 2, y: this.renderer.height / 2 - width / 2 });
 
 	            this.theme = ThemeGamebookers;
-	            this.seed = (0, _seedrandom2.default)(seed);
-	            this.gridSize = grid + 2;
+	            this.seed = Math.floor(Math.random() * 10000);
+	            this.random = (0, _seedrandom2.default)(seed);
+	            this.gridSize = grid + 2; // Plus two for the extra bounding lanes
 	            this.grid = new _ui.Grid({
 	                grid: this.gridSize,
-	                width: 400,
+	                width: width,
 	                renderDot: this.renderGridDot.bind(this),
 	                renderTile: this.renderGridTile.bind(this)
 	            });
@@ -1021,7 +1025,7 @@
 	            this.posts = (0, _Util.Array2d)(this.gridSize - 2, function (x, y) {
 	                // Create the gates for each grid dot. We can only have 1 gates
 	                // on corner dots and two on outer dots.
-	                var hingeCount = _this2.randInt(2, 4);
+	                var hingeCount = _this2.randInt(1, 4 - _this2.randInt(3));
 
 	                var hinges = [];
 
@@ -1051,8 +1055,14 @@
 	                color: this.theme.player
 	            });
 
+	            this.game.addChild(new _primitives.Rect({ width: this.grid.width, height: 5, fill: this.theme.player }));
 	            this.game.addChild(this.player);
 	            this.addChild(this.game);
+
+	            if (_Config.DEBUG) {
+	                this.seedText = new _primitives.Text({ x: 5, y: 5, text: "Seed: " + this.seed });
+	                this.addChild(this.seedText);
+	            }
 	        }
 
 	        /**
@@ -1079,7 +1089,7 @@
 	        key: "randInt",
 	        value: function randInt(min, max) {
 	            if (typeof max === "undefined") max = min, min = 0;
-	            return Math.floor(min + this.seed() * (max - min));
+	            return Math.floor(min + this.random() * (max - min));
 	        }
 	    }, {
 	        key: "renderGridDot",
@@ -1123,7 +1133,7 @@
 	                        // Display any highlights
 	                        if (hinge.highlight) {
 	                            var now = Date.now();
-	                            if (now - hinge.highlightTime > 1000) {
+	                            if (now - hinge.highlightTime > 300) {
 	                                hinge.highlight = false;
 	                                delete hinge.highlightTime;
 	                            }
@@ -1134,16 +1144,23 @@
 	                        }
 
 	                        ctx.fillRect(-2, 0, 4, _this3.grid.spacing * 0.47);
-	                        ctx.fillStyle = "red";
-	                        ctx.fillText("" + hinge.direction, 0, 15);
+
+	                        if (_Config.DEBUG >= 5) {
+	                            ctx.fillStyle = "red";
+	                            ctx.fillText("" + hinge.direction, 0, 15);
+	                        }
+
 	                        ctx.restore();
 	                    });
 
 	                    // Render the post
 	                    ctx.fillStyle = _this3.theme.post;
 	                    ctx.fillRect(-4, -4, 8, 8);
-	                    ctx.fillStyle = "blue";
-	                    ctx.fillText(hx + "," + hy, 0, 0);
+
+	                    if (_Config.DEBUG >= 3) {
+	                        ctx.fillStyle = "blue";
+	                        ctx.fillText(hx + "," + hy, 0, 0);
+	                    }
 	                })();
 	            }
 	        }
@@ -1167,11 +1184,13 @@
 	            ctx.stroke();
 	            ctx.closePath();
 
-	            // Render Coordinate
-	            ctx.fillStyle = this.theme.coord;
-	            ctx.textAlign = "center";
-	            ctx.textBaseline = "middle";
-	            ctx.fillText(x + "," + y, size / 2, size / 2);
+	            if (_Config.DEBUG >= 3) {
+	                // Render Coordinate
+	                ctx.fillStyle = this.theme.coord;
+	                ctx.textAlign = "center";
+	                ctx.textBaseline = "middle";
+	                ctx.fillText(x + "," + y, size / 2, size / 2);
+	            }
 	        }
 
 	        /**
@@ -1188,6 +1207,21 @@
 
 	            var x = _player$currentPositi[0];
 	            var y = _player$currentPositi[1];
+
+	            var _Player$movePoint = _Player2.default.movePoint(x, y, _move);
+
+	            var _Player$movePoint2 = _slicedToArray(_Player$movePoint, 2);
+
+	            var nx = _Player$movePoint2[0];
+	            var ny = _Player$movePoint2[1];
+
+	            var gs = this.gridSize - 2; // Minux two to account for extra lanes
+
+	            // Not allow to move outside the posts
+	            if (nx < 0 || ny < 0 || nx > gs || ny > gs) {
+	                debug("Illegal move, ignoring.");
+	                return;
+	            }
 
 	            var direction = Game.moveToDirection(_move);
 	            var gateState = this.getGateState(x, y, direction);
@@ -1227,7 +1261,8 @@
 
 	            var hp = Math.PI / 2;
 	            var rotationTransform = rotation === "left" ? hp : -hp;
-	            (0, _Util.forEach2d)(this.posts, function (hinges, rx, ry) {
+	            (0, _Util.map2d)(this.posts, function (hinges, rx, ry) {
+	                // Rotate the hinges
 	                hinges.forEach(function (hinge, i) {
 	                    var directionPrevious = hinge.direction;
 	                    var direction = Game.rotateDirection(directionPrevious, rotation === "left");
@@ -1256,6 +1291,15 @@
 	                    // when determining strings.
 	                    hinge.direction = direction;
 	                });
+
+	                // Now remove any hinges facing the same direction
+	                return hinges.reduce(function (nextHinges, hinge) {
+	                    if (!nextHinges.find(function (h) {
+	                        return hinge.direction === h.direction;
+	                    })) nextHinges.push(hinge);
+
+	                    return nextHinges;
+	                }, []);
 	            });
 	        }
 	    }, {
@@ -6969,7 +7013,7 @@
 	        _classCallCheck(this, Button);
 
 	        var grid = options.grid || 5;
-	        var spacing = options.width ? options.width / grid - 1 : options.spacing || 18;
+	        var spacing = options.width ? options.width / (grid - 1) : options.spacing || 18;
 	        var width = options.width || grid - 1 * spacing;
 	        var height = options.height || 40;
 
@@ -6978,6 +7022,7 @@
 	        _this.leaf = true;
 	        _this.grid = grid;
 	        _this.spacing = spacing;
+	        _this.width = width;
 
 	        debug("<Grid size=" + grid + " spacing=" + spacing + ">");
 
@@ -7003,7 +7048,7 @@
 	                    ctx.translate(posX, posY);
 
 	                    // We render one less tile than post
-	                    if (x < grid - 1 && y < grid - 1) this.renderTile(ctx, x, y, this.spacing);
+	                    if (x < grid - 1 && y < grid - 1) this.renderTile(ctx, x, y, spacing);
 
 	                    this.renderDot(ctx, x, y);
 	                    ctx.restore();
@@ -7044,7 +7089,11 @@
 
 	var _Util = __webpack_require__(5);
 
+	var _Config = __webpack_require__(57);
+
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
 	function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -7066,7 +7115,7 @@
 	        _this.spacing = options.spacing;
 	        _this.positions = [options.initialPosition];
 	        _this.currentPosition = options.initialPosition;
-	        _this.size = 16;
+	        _this.size = _this.spacing * 0.3;
 	        _this.color = options.color || "green";
 	        return _this;
 	    }
@@ -7079,42 +7128,48 @@
 	            var s = this.size;
 	            var hs = this.size / 2;
 
+	            ctx.beginPath();
+
+	            var _positions$ = _slicedToArray(this.positions[0], 2);
+
+	            var ix = _positions$[0];
+	            var iy = _positions$[1];
+
+	            ctx.moveTo(this.toRealPosition(ix), this.toRealPosition(iy) - this.spacing / 2);
+
 	            // Render the tron stream
-	            if (this.positions.length > 1) {
-	                ctx.beginPath();
+	            if (this.positions.length > 2) this.positions.slice(1, -1).forEach(function (_ref, i) {
+	                var _ref2 = _slicedToArray(_ref, 2);
 
-	                var _positions$ = _slicedToArray(this.positions[0], 2);
+	                var x = _ref2[0];
+	                var y = _ref2[1];
 
-	                var ix = _positions$[0];
-	                var iy = _positions$[1];
-
-	                ctx.moveTo(this.toRealPosition(ix), this.toRealPosition(iy));
-
-	                this.positions.forEach(function (_ref, i) {
-	                    var _ref2 = _slicedToArray(_ref, 2);
-
-	                    var x = _ref2[0];
-	                    var y = _ref2[1];
-
-	                    if (i === 0) return;
-	                    ctx.lineTo(_this2.toRealPosition(x), _this2.toRealPosition(y));
-	                });
-
-	                ctx.strokeStyle = this.color;
-	                ctx.lineWidth = hs;
-	                ctx.stroke();
-	            }
+	                ctx.lineTo(_this2.toRealPosition(x), _this2.toRealPosition(y));
+	            });
 
 	            var _currentPosition = _slicedToArray(this.currentPosition, 2);
 
-	            var x = _currentPosition[0];
-	            var y = _currentPosition[1];
+	            var cx = _currentPosition[0];
+	            var cy = _currentPosition[1];
 
-	            x = this.toRealPosition(x);
-	            y = this.toRealPosition(y);
+	            var x = this.toRealPosition(cx);
+	            var y = this.toRealPosition(cy);
 
+	            ctx.lineTo(x, y);
+	            ctx.strokeStyle = this.color;
+	            ctx.lineWidth = hs;
+	            ctx.stroke();
+
+	            ctx.translate(x, y);
 	            ctx.fillStyle = this.color;
-	            ctx.fillRect(x - hs, y - hs, s, s);
+	            ctx.fillRect(-hs, -hs, s, s);
+
+	            if ((false) >= 3) {
+	                ctx.fillStyle = "purple";
+	                ctx.textAlign = "center";
+	                ctx.textBaseline = "middle";
+	                ctx.fillText(cx + "," + cy, 0, 0);
+	            }
 	        }
 	    }, {
 	        key: "isOnTile",
@@ -7158,33 +7213,50 @@
 	         * @param  {String} move See .moves.
 	         */
 	        value: function move(_move) {
-	            _move = Player.moves[_move];
+	            var _Player$movePoint = Player.movePoint.apply(Player, _toConsumableArray(this.currentPosition).concat([_move]));
 
-	            var _currentPosition2 = _slicedToArray(this.currentPosition, 2);
+	            var _Player$movePoint2 = _slicedToArray(_Player$movePoint, 2);
 
-	            var x = _currentPosition2[0];
-	            var y = _currentPosition2[1];
-
-
-	            if (_move === Player.moves.up) y -= 1;else if (_move === Player.moves.down) y += 1;else if (_move === Player.moves.left) x -= 1;else if (_move === Player.moves.right) x += 1;
+	            var x = _Player$movePoint2[0];
+	            var y = _Player$movePoint2[1];
 
 	            debug("Moving %s (from %o)", Player.moves[_move], this.currentPosition);
+
+	            if (this.positions.length > 1) {
+	                var _positions = _slicedToArray(this.positions[this.positions.length - 2], 2);
+
+	                var px = _positions[0];
+	                var py = _positions[1];
+
+
+	                if (x === px && y === py) this.positions.pop();
+	            }
+
 	            this.moveTo(x, y);
 	        }
+	    }, {
+	        key: "moveTo",
+
 
 	        /**
 	         * Force a player to jump to a position.
 	         * @param  {Number} x X tile position.
 	         * @param  {Number} y Y tile position.
 	         */
-
-	    }, {
-	        key: "moveTo",
 	        value: function moveTo(x, y) {
 	            var position = [x, y];
 	            debug("Moving to %o from %o", position, this.currentPosition);
 	            this.positions.push(position);
 	            this.currentPosition = position;
+	        }
+	    }], [{
+	        key: "movePoint",
+	        value: function movePoint(x, y, move) {
+	            move = Player.moves[move];
+
+	            if (move === Player.moves.up) y -= 1;else if (move === Player.moves.down) y += 1;else if (move === Player.moves.left) x -= 1;else if (move === Player.moves.right) x += 1;
+
+	            return [x, y];
 	        }
 	    }]);
 
@@ -7196,6 +7268,21 @@
 
 /***/ },
 /* 57 */
+/***/ function(module, exports) {
+
+	"use strict";
+
+	Object.defineProperty(exports, "__esModule", {
+	  value: true
+	});
+	/**
+	 * Different levels of debug. Increase for more verbosity.
+	 * @type {Number}
+	 */
+	var DEBUG = exports.DEBUG = 1;
+
+/***/ },
+/* 58 */
 /***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
@@ -7251,7 +7338,7 @@
 	exports.default = Menu;
 
 /***/ },
-/* 58 */
+/* 59 */
 /***/ function(module, exports) {
 
 	module.exports = {
@@ -7259,10 +7346,10 @@
 			{
 				"seed": 41242134,
 				"initialPosition": [
-					4,
+					2,
 					0
 				],
-				"grid": 5
+				"grid": 8212
 			}
 		]
 	};
