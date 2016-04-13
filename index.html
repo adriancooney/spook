@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Game</title>
+    <style>
+        body {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #ccc;
+            overflow: hidden;
+        }
+
+        article {
+            display: block;
+        }
+
+        article p {
+            text-align: right;
+            font-family: sans-serif;
+            font-size: 80%;
+            margin: 6px 0;
+            color: rgba(0,0,0,0.5);
+        }
+
+        canvas {
+            display: block;
+            box-shadow: 0px 12px 40px rgba(0,0,0,0.4);
+        }
+    </style>
+</head>
+<body>
+<article>
+    <canvas id="game"></canvas>
+    <p>By Adrian Cooney.</p>
+</article>
+</body>
+<script type="text/javascript" src="build/index.js"></script>
+</html>
