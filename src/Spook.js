@@ -1,4 +1,5 @@
 import Debug from "debug";
+import Hammer from "hammerjs";
 import Renderer from "./library/Renderer";
 
 const debug = Debug("game");
@@ -11,6 +12,9 @@ export default class Spook {
         this.currentScene = null;
 
         this.renderer.canvas.addEventListener("click", ::this.onClick);
+        var gestures = new Hammer(document);
+        gestures.get("swipe").set({ direction: Hammer.DIRECTION_ALL });
+        gestures.on("swipe", ::this.onSwipe);
         window.addEventListener("keydown", ::this.onKeyDown);
 
         this.renderer.render = ::this.render;
@@ -57,5 +61,19 @@ export default class Spook {
 
     onKeyDown(event) {
         this.currentScene.onKeyDown(event.keyCode || event.which, event);
+    }
+
+    onSwipe(event) {
+        let direction;
+
+        switch(event.direction) {
+            case Hammer.DIRECTION_UP: direction = "up"; break;
+            case Hammer.DIRECTION_LEFT: direction = "left"; break;
+            case Hammer.DIRECTION_RIGHT: direction = "right"; break;
+            case Hammer.DIRECTION_DOWN: direction = "down"; break;
+        }
+
+        // Convert swipes to keys
+        this.currentScene.onSwipe(direction);
     }
 }
