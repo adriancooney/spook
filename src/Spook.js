@@ -56,6 +56,7 @@ export default class Spook {
     }
 
     onKeyDown(event) {
-        this.currentScene.onKeyDown(event.which, event.keyIdentifier);
+        event.preventDefault();
+        this.currentScene.onKeyDown(event.keyCode || event.which, event.keyIdentifier);
     }
 }

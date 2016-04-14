@@ -13,12 +13,6 @@
             "difficulty": 5
         },
         {
-            "seed": 1000,
-            "initialPosition": 2,
-            "grid": 5,
-            "difficulty": 2
-        },
-        {
             "seed": 450067,
             "grid": 4,
             "initialPosition": 1,

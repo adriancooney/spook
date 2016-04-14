@@ -1,10 +1,11 @@
 import seedrandom from "seedrandom";
 import Debug from "debug";
 import Scene from "../../library/Scene";
+import Player from "./Player";
+import Save from "../../library/Save";
 import { Enum, Array2d, map2d } from "../../Util";
 import { Button, Grid } from "../../ui";
 import { Group, Text, Rect } from "../../ui/primitives";
-import Player from "./Player";
 import { DEBUG, Theme } from "../../Config";
 import { levels } from "../../levels.json";
 
@@ -87,7 +88,7 @@ export default class Game extends Scene {
         // Level indicator
         if(typeof this.level !== "undefined") {
             this.addChild(new Text({
-                text: `LEVEL ${this.level}`,
+                text: `LEVEL ${this.level + 1}`,
                 x: this.renderer.width/2,
                 y: 5,
                 align: "center",
@@ -338,7 +339,7 @@ export default class Game extends Scene {
         this.startline.fill = this.theme.finish;
 
         if(typeof this.level !== "undefined") setTimeout(() => {
-            this.transition("Game", ++this.level);
+            this.transition("Game", Save.set("level", ++this.level));
         }, 1500);
     }
 
@@ -400,10 +401,15 @@ export default class Game extends Scene {
      * Handle keypress.
      */
     onKeyDown(which, name) {
-        const move = name.toLowerCase();
+        const keys = {
+            [37]: "left",
+            [38]: "up",
+            [39]: "right",
+            [40]: "down"
+        };
 
-        if(Player.moves.hasOwnProperty(move)) // "up", "left", "right", "down"
-            this.move(move);
+        if(keys[which]) // "up", "left", "right", "down"
+            this.move(keys[which]);
     }
 
     /**
