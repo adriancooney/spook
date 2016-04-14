@@ -8,15 +8,7 @@ import Player from "./Player";
 import { DEBUG, Theme } from "../../Config";
 import { levels } from "../../levels.json";
 
-const Rotations = {
-    "NORTH": 0,
-    "EAST": Math.PI/2,
-    "SOUTH": Math.PI,
-    "WEST": Math.PI*1.5
-};
-
-const Directions = Enum(...Object.keys(Rotations));
-
+const Directions = Enum("NORTH", "EAST", "SOUTH", "WEST");
 const debug = Debug("game:Game");
 
 export default class Game extends Scene {
