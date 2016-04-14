@@ -21,7 +21,7 @@ export default class Game extends Scene {
 
         let { seed, initialPosition, grid, difficulty } = level;
 
-        const width = 400;
+        const width = this.renderer.width * 0.7;
         this.game = new Group({ x: (this.renderer.width/2) - (width/2), y: (this.renderer.height/2) - (width/2) });
 
         this.theme = Theme;
@@ -90,7 +90,7 @@ export default class Game extends Scene {
             this.addChild(new Text({
                 text: `LEVEL ${this.level + 1}`,
                 x: this.renderer.width/2,
-                y: 5,
+                y: this.renderer.width/2 - this.grid.width/2 - 45,
                 align: "center",
                 font: "bold 1.5em Arial",
                 color: "#aaa"
@@ -100,7 +100,7 @@ export default class Game extends Scene {
             this.addChild(new Button({
                 text: "RESTART",
                 x: (this.renderer.width/2) + (this.grid.width/2) - 60,
-                y: (this.renderer.height/2) + (this.grid.width/2) + 16,
+                y: (this.renderer.height/2) + (this.grid.width/2) + 10,
                 font: "14px Arial",
                 fillText: "#777",
                 width: 60,

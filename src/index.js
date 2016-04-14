@@ -11,10 +11,9 @@ Debug.enable("game*");
 window.addEventListener("DOMContentLoaded", function() {
     const canvas = document.getElementById("game");
 
-    const width = 500;
-    const height = 500;
+    const width = 500 > window.innerWidth ? window.innerWidth : 500;
     const res = 2; // @2x
-    const game = new Spook(new Renderer(canvas, width, height, res));
+    const game = new Spook(new Renderer(canvas, width, width, res));
 
     for(var scene in scenes)
         game.registerScene(scene, scenes[scene]);
