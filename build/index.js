@@ -88,12 +88,16 @@
 	        game.registerScene(scene, scenes[scene]);
 	    }if (window.location.search.length > 1) {
 	        var options = _qs2.default.parse(window.location.search.substr(1));
-	        var grid = parseInt(options.grid) || 5;
-	        game.start("Game", {
-	            grid: grid,
-	            seed: parseInt(options.seed) || Math.floor(Math.random() * 1000000),
-	            initialPosition: options.pos ? parseInt(options.pos) : Math.floor(Math.random() * grid + 1)
-	        });
+	        var level = parseInt(options.level);
+
+	        if (level) game.start("Game", level);else {
+	            var grid = parseInt(options.grid) || 5;
+	            game.start("Game", {
+	                grid: grid,
+	                seed: parseInt(options.seed) || Math.floor(Math.random() * 1000000),
+	                initialPosition: options.pos ? parseInt(options.pos) : Math.floor(Math.random() * grid + 1)
+	            });
+	        }
 	    } else {
 	        game.start("Game", 0);
 	    }
@@ -1461,17 +1465,7 @@
 
 	function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-	function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
-
-	var Rotations = {
-	    "NORTH": 0,
-	    "EAST": Math.PI / 2,
-	    "SOUTH": Math.PI,
-	    "WEST": Math.PI * 1.5
-	};
-
-	var Directions = _Util.Enum.apply(undefined, _toConsumableArray(Object.keys(Rotations)));
-
+	var Directions = (0, _Util.Enum)("NORTH", "EAST", "SOUTH", "WEST");
 	var debug = (0, _debug2.default)("game:Game");
 
 	var Game = function (_Scene) {
@@ -1520,6 +1514,9 @@
 	            this.posts = (0, _Util.Array2d)(this.gridSize - 2, function (x, y) {
 	                // Create the gates for each grid dot. We can only have 1 gates
 	                // on corner dots and two on outer dots.
+	                //
+	                // WARNING: ADJUSTING THIS ALGORITHM WILL INVALIDATE ALL
+	                // THE LEVELS!
 	                var hingeCount = _this2.randInt(1, 4 - _this2.randInt(2));
 
 	                var hinges = [];
@@ -1685,7 +1682,7 @@
 
 	                        ctx.fillRect(-2, 0, 4, _this3.grid.spacing * 0.47);
 
-	                        if (_Config.DEBUG >= 5) {
+	                        if (_Config.DEBUG >= 3) {
 	                            ctx.fillStyle = "red";
 	                            ctx.fillText("" + hinge.direction, 0, 15);
 	                        }
@@ -1694,7 +1691,7 @@
 	                    });
 
 	                    // Render the post
-	                    ctx.fillStyle = _this3.theme.post;
+	                    ctx.fillStyle = _this3.theme.post[hinges.length];
 	                    ctx.beginPath();
 	                    ctx.arc(0, 0, 6, 0, Math.PI * 2);
 	                    ctx.closePath();
@@ -1863,7 +1860,7 @@
 	            this.player.color = this.theme.finish;
 	            this.startline.fill = this.theme.finish;
 
-	            setTimeout(function () {
+	            if (typeof this.level !== "undefined") setTimeout(function () {
 	                _this5.transition("Game", ++_this5.level);
 	            }, 1500);
 	        }
@@ -7116,18 +7113,26 @@
 
 /***/ },
 /* 51 */
-/***/ function(module, exports) {
+/***/ function(module, exports, __webpack_require__) {
 
 	"use strict";
 
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
+	exports.Theme = exports.DEBUG = undefined;
+
+	var _qs = __webpack_require__(1);
+
+	var _qs2 = _interopRequireDefault(_qs);
+
+	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
 	/**
 	 * Different levels of debug. Increase for more verbosity.
 	 * @type {Number}
 	 */
-	var DEBUG = exports.DEBUG = 0;
+	var DEBUG = exports.DEBUG = typeof window !== "undefined" && window.location.search.length > 1 ? parseInt(_qs2.default.parse(window.location.search).debug) : 0;
 
 	var ThemeBlue = {
 	    border: "#E0E4CC",
@@ -7139,7 +7144,11 @@
 
 	var Theme = exports.Theme = {
 	    border: "#BCBCBC",
-	    post: "#FF9900",
+	    post: {
+	        "1": "#FF9900",
+	        "2": "red",
+	        "3": "purple"
+	    },
 	    hinge: "#424242",
 	    hingeHighlight: "#C41A1E",
 	    tile: "#E9E9E9",
@@ -7914,9 +7923,40 @@
 				"difficulty": 2
 			},
 			{
-				"seed": 8212,
+				"seed": 450067,
+				"grid": 4,
+				"initialPosition": 1,
+				"difficulty": 3
+			},
+			{
+				"seed": 127724,
+				"grid": 4,
+				"initialPosition": 1,
+				"difficulty": 5
+			},
+			{
+				"seed": 362514,
+				"grid": 4,
 				"initialPosition": 2,
-				"grid": 10
+				"difficulty": 7
+			},
+			{
+				"seed": 473773,
+				"grid": 6,
+				"initialPosition": 1,
+				"difficulty": 5
+			},
+			{
+				"seed": 128371,
+				"grid": 6,
+				"initialPosition": 3,
+				"difficulty": 2
+			},
+			{
+				"seed": 430590,
+				"grid": 10,
+				"initialPosition": 4,
+				"difficulty": "unfinished"
 			}
 		]
 	};
