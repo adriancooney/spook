@@ -204,7 +204,7 @@ export default class Game extends Scene {
             });
 
             // Render the post
-            ctx.fillStyle = this.theme.post;
+            ctx.fillStyle = this.theme.post[hinges.length];
             ctx.beginPath();
             ctx.arc(0, 0, 6, 0, Math.PI*2);
             ctx.closePath();

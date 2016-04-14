@@ -17,7 +17,11 @@ const ThemeBlue = {
 
 export const Theme = {
     border: "#BCBCBC",
-    post: "#FF9900",
+    post: {
+        "1": "#FF9900",
+        "2": "red",
+        "3": "purple"
+    },
     hinge: "#424242",
     hingeHighlight: "#C41A1E",
     tile: "#E9E9E9",
