@@ -8,15 +8,7 @@ import Player from "./Player";
 import { DEBUG, Theme } from "../../Config";
 import { levels } from "../../levels.json";
 
-const Rotations = {
-    "NORTH": 0,
-    "EAST": Math.PI/2,
-    "SOUTH": Math.PI,
-    "WEST": Math.PI*1.5
-};
-
-const Directions = Enum(...Object.keys(Rotations));
-
+const Directions = Enum("NORTH", "EAST", "SOUTH", "WEST");
 const debug = Debug("game:Game");
 
 export default class Game extends Scene {
@@ -48,6 +40,9 @@ export default class Game extends Scene {
         this.posts = Array2d(this.gridSize - 2, (x, y) => {
             // Create the gates for each grid dot. We can only have 1 gates
             // on corner dots and two on outer dots.
+            // 
+            // WARNING: ADJUSTING THIS ALGORITHM WILL INVALIDATE ALL
+            // THE LEVELS!
             const hingeCount = this.randInt(1, 4 - this.randInt(2));
 
             const hinges = [];
@@ -192,7 +187,7 @@ export default class Game extends Scene {
 
                 ctx.fillRect(-2, 0, 4, this.grid.spacing * 0.47);
 
-                if(DEBUG >= 5) {
+                if(DEBUG >= 3) {
                     ctx.fillStyle = "red";
                     ctx.fillText(`${hinge.direction}`, 0, 15);
                 }
@@ -201,7 +196,7 @@ export default class Game extends Scene {
             });
 
             // Render the post
-            ctx.fillStyle = this.theme.post;
+            ctx.fillStyle = this.theme.post[hinges.length];
             ctx.beginPath();
             ctx.arc(0, 0, 6, 0, Math.PI*2);
             ctx.closePath();
@@ -342,7 +337,7 @@ export default class Game extends Scene {
         this.player.color = this.theme.finish;
         this.startline.fill = this.theme.finish;
 
-        setTimeout(() => {
+        if(typeof this.level !== "undefined") setTimeout(() => {
             this.transition("Game", ++this.level);
         }, 1500);
     }
