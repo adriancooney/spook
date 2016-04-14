@@ -400,7 +400,7 @@ export default class Game extends Scene {
     /*
      * Handle keypress.
      */
-    onKeyDown(which, name) {
+    onKeyDown(which, event) {
         const keys = {
             [37]: "left",
             [38]: "up",
@@ -408,8 +408,11 @@ export default class Game extends Scene {
             [40]: "down"
         };
 
-        if(keys[which]) // "up", "left", "right", "down"
+        if(keys[which]) { // "up", "left", "right", "down"
+            // Stop scrolling in Firefox
+            event.preventDefault();
             this.move(keys[which]);
+        }
     }
 
     /**
