@@ -83,10 +83,9 @@
 	window.addEventListener("DOMContentLoaded", function () {
 	    var canvas = document.getElementById("game");
 
-	    var width = 500;
-	    var height = 500;
+	    var width = 500 > window.innerWidth ? window.innerWidth : 500;
 	    var res = 2; // @2x
-	    var game = new _Spook2.default(new _Renderer2.default(canvas, width, height, res));
+	    var game = new _Spook2.default(new _Renderer2.default(canvas, width, width, res));
 
 	    for (var scene in scenes) {
 	        game.registerScene(scene, scenes[scene]);
@@ -1309,10 +1308,15 @@
 	        this.currentScene = null;
 
 	        this.renderer.canvas.addEventListener("click", this.onClick.bind(this));
+	        window.addEventListener("keydown", this.onKeyDown.bind(this));
+
+	        // Add support for gestures
 	        var gestures = new _hammerjs2.default(document);
 	        gestures.get("swipe").set({ direction: _hammerjs2.default.DIRECTION_ALL });
 	        gestures.on("swipe", this.onSwipe.bind(this));
-	        window.addEventListener("keydown", this.onKeyDown.bind(this));
+	        document.body.addEventListener("touchmove", function (e) {
+	            return e.preventDefault();
+	        }); // Fix for overscroll
 
 	        this.renderer.render = this.render.bind(this);
 	        this.renderer.update = this.update.bind(this);
@@ -4152,7 +4156,7 @@
 	            var difficulty = _level.difficulty;
 
 
-	            var width = 400;
+	            var width = this.renderer.width * 0.7;
 	            this.game = new _primitives.Group({ x: this.renderer.width / 2 - width / 2, y: this.renderer.height / 2 - width / 2 });
 
 	            this.theme = _Config.Theme;
@@ -4228,7 +4232,7 @@
 	                this.addChild(new _primitives.Text({
 	                    text: "LEVEL " + (this.level + 1),
 	                    x: this.renderer.width / 2,
-	                    y: 5,
+	                    y: this.renderer.width / 2 - this.grid.width / 2 - 45,
 	                    align: "center",
 	                    font: "bold 1.5em Arial",
 	                    color: "#aaa"
@@ -4238,7 +4242,7 @@
 	                this.addChild(new _ui.Button({
 	                    text: "RESTART",
 	                    x: this.renderer.width / 2 + this.grid.width / 2 - 60,
-	                    y: this.renderer.height / 2 + this.grid.width / 2 + 16,
+	                    y: this.renderer.height / 2 + this.grid.width / 2 + 10,
 	                    font: "14px Arial",
 	                    fillText: "#777",
 	                    width: 60,
