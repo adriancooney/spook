@@ -47,5 +47,6 @@ export default class Scene extends Rect {
         });
     }
 
-    onKeyDown(key) {}
+    onKeyDown(key, event) {}
+    onSwipe(direction) {}
 }

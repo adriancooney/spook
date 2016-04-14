@@ -415,6 +415,10 @@ export default class Game extends Scene {
         }
     }
 
+    onSwipe(direction) {
+        this.move(direction);
+    }
+
     /**
      * Rotate a direction clockwise or anti-clockwise.
      *
