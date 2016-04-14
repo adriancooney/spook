@@ -1,8 +1,11 @@
+import qs from "qs";
+
 /**
  * Different levels of debug. Increase for more verbosity.
  * @type {Number}
  */
-export const DEBUG = 0;
+export const DEBUG = typeof window !== "undefined" && window.location.search.length > 1 ? 
+    parseInt(qs.parse(window.location.search).debug) : 0;
 
 const ThemeBlue = {
     border: "#E0E4CC",

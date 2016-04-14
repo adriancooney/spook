@@ -1,22 +1,58 @@
 {
-    "levels": [{
-        "seed": 224,
-        "initialPosition": 0,
-        "grid": 3,
-        "difficulty": 1    
-    }, {
-        "seed": 2,
-        "initialPosition": 4,
-        "grid": 5,
-        "difficulty": 5
-    }, {
-        "seed": 1000,
-        "initialPosition": 2,
-        "grid": 5,
-        "difficulty": 2
-    }, {
-        "seed": 8212,
-        "initialPosition": 2,
-        "grid": 10
-    }]
+    "levels": [
+        {
+            "seed": 224,
+            "initialPosition": 0,
+            "grid": 3,
+            "difficulty": 1
+        },
+        {
+            "seed": 2,
+            "initialPosition": 4,
+            "grid": 5,
+            "difficulty": 5
+        },
+        {
+            "seed": 1000,
+            "initialPosition": 2,
+            "grid": 5,
+            "difficulty": 2
+        },
+        {
+            "seed": 450067,
+            "grid": 4,
+            "initialPosition": 1,
+            "difficulty": 3
+        },
+        {
+            "seed": 127724,
+            "grid": 4,
+            "initialPosition": 1,
+            "difficulty": 5
+        },
+        {
+            "seed": 362514,
+            "grid": 4,
+            "initialPosition": 2,
+            "difficulty": 7
+        },
+        {
+            "seed": 473773,
+            "grid": 6,
+            "initialPosition": 1,
+            "difficulty": 5
+        },
+        {
+            "seed": 128371,
+            "grid": 6,
+            "initialPosition": 3,
+            "difficulty": 2
+        },
+        {
+            "seed": 430590,
+            "grid": 10,
+            "initialPosition": 4,
+            "difficulty": "unfinished"
+        }
+    ]
 }

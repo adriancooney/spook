@@ -21,12 +21,17 @@ window.addEventListener("DOMContentLoaded", function() {
 
     if(window.location.search.length > 1) {
         const options = qs.parse(window.location.search.substr(1));
-        const grid = parseInt(options.grid) || 5;
-        game.start("Game", {
-            grid,
-            seed: parseInt(options.seed) || Math.floor(Math.random() * 1000000),
-            initialPosition: options.pos ? parseInt(options.pos) : Math.floor(Math.random() * grid + 1)
-        });
+        const level = parseInt(options.level);
+
+        if(level) game.start("Game", level);
+        else {
+            const grid = parseInt(options.grid) || 5;
+            game.start("Game", {
+                grid,
+                seed: parseInt(options.seed) || Math.floor(Math.random() * 1000000),
+                initialPosition: options.pos ? parseInt(options.pos) : Math.floor(Math.random() * grid + 1)
+            });
+        }
     } else {
         game.start("Game", 0);
     }
