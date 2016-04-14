@@ -1369,8 +1369,7 @@
 	    }, {
 	        key: "onKeyDown",
 	        value: function onKeyDown(event) {
-	            event.preventDefault();
-	            this.currentScene.onKeyDown(event.keyCode || event.which, event.keyIdentifier);
+	            this.currentScene.onKeyDown(event.keyCode || event.which, event);
 	        }
 	    }]);
 
@@ -1994,13 +1993,17 @@
 
 	    }, {
 	        key: "onKeyDown",
-	        value: function onKeyDown(which, name) {
+	        value: function onKeyDown(which, event) {
 	            var _keys;
 
 	            var keys = (_keys = {}, _defineProperty(_keys, 37, "left"), _defineProperty(_keys, 38, "up"), _defineProperty(_keys, 39, "right"), _defineProperty(_keys, 40, "down"), _keys);
 
-	            if (keys[which]) // "up", "left", "right", "down"
+	            if (keys[which]) {
+	                // "up", "left", "right", "down"
+	                // Stop scrolling in Firefox
+	                event.preventDefault();
 	                this.move(keys[which]);
+	            }
 	        }
 
 	        /**
