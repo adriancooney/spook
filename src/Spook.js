@@ -12,10 +12,13 @@ export default class Spook {
         this.currentScene = null;
 
         this.renderer.canvas.addEventListener("click", ::this.onClick);
+        window.addEventListener("keydown", ::this.onKeyDown);
+
+        // Add support for gestures
         var gestures = new Hammer(document);
         gestures.get("swipe").set({ direction: Hammer.DIRECTION_ALL });
         gestures.on("swipe", ::this.onSwipe);
-        window.addEventListener("keydown", ::this.onKeyDown);
+        document.body.addEventListener("touchmove", e => e.preventDefault()); // Fix for overscroll
 
         this.renderer.render = ::this.render;
         this.renderer.update = ::this.update;
